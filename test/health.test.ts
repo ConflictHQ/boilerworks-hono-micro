@@ -1,0 +1,14 @@
+import { describe, it, expect } from 'vitest';
+import app from '../src/index';
+
+describe('GET /health', () => {
+  it('returns healthy status without auth', async () => {
+    const resp = await app.request('/health');
+    expect(resp.status).toBe(200);
+
+    const body = await resp.json();
+    expect(body.ok).toBe(true);
+    expect(body.data.status).toBe('healthy');
+    expect(body.data.timestamp).toBeDefined();
+  });
+});

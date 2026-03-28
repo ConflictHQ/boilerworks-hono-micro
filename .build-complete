@@ -1,0 +1,14 @@
+Build completed: 2026-03-27
+
+Template: boilerworks-hono-micro
+Stack: Hono + Cloudflare Workers + D1
+
+Phases completed:
+- [x] Phase 0: Scaffolding (Hono app, wrangler config, TS, D1, health check, ESLint/Prettier, vitest+miniflare)
+- [x] Phase 1: Auth (api_keys table, API-key middleware, seed script, scope checking)
+- [x] Phase 2: Core API (Events CRUD, ApiResponse wrapper, Zod validation)
+- [x] Phase 3: Infrastructure (CI pipeline, README, CLAUDE.md)
+
+Tests: 18 passing (3 test files)
+Lint: ESLint + Prettier clean
+Typecheck: Clean
