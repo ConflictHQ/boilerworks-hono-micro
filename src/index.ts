@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import type { Env, Variables, ApiResponse } from './types.js';
+import { rateLimit } from './middleware/rate-limit.js';
 import { health } from './routes/health.js';
 import { events } from './routes/events.js';
 import { apiKeys } from './routes/api-keys.js';
@@ -18,6 +19,7 @@ app.use(
     allowHeaders: ['Content-Type', 'X-API-Key'],
   }),
 );
+app.use('*', rateLimit);
 
 // Routes
 app.route('/', health);
@@ -31,6 +33,10 @@ app.notFound((c) => {
 
 // Global error handler
 app.onError((err, c) => {
+  // Malformed JSON body
+  if (err instanceof SyntaxError && err.message.includes('JSON')) {
+    return c.json<ApiResponse>({ ok: false, message: 'Invalid JSON body' }, 400);
+  }
   console.error('Unhandled error:', err);
   return c.json<ApiResponse>({ ok: false, message: 'Internal server error' }, 500);
 });

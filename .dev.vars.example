@@ -1,5 +1,12 @@
 # Local development secrets (copy to .dev.vars)
 # See: https://developers.cloudflare.com/workers/configuration/secrets/
-
+#
 # No secrets required for local dev -- API keys are stored in D1.
 # Add any external service keys here as needed.
+#
+# Non-secret vars are set in wrangler.toml [vars]:
+#   ENVIRONMENT  — "development" | "staging" | "production"
+#
+# D1 database binding (DB) is configured in wrangler.toml [[d1_databases]].
+# Run migrations: pnpm db:migrate:local
+# Seed an API key: pnpm seed

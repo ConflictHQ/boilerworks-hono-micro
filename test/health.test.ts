@@ -1,7 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import app from '../src/index';
+import { resetRateLimitStore } from '../src/middleware/rate-limit';
 
 describe('GET /health', () => {
+  beforeEach(() => {
+    resetRateLimitStore();
+  });
+
   it('returns healthy status without auth', async () => {
     const resp = await app.request('/health');
     expect(resp.status).toBe(200);
