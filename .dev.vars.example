@@ -1,0 +1,5 @@
+# Local development secrets (copy to .dev.vars)
+# See: https://developers.cloudflare.com/workers/configuration/secrets/
+
+# No secrets required for local dev -- API keys are stored in D1.
+# Add any external service keys here as needed.

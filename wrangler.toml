@@ -1,0 +1,13 @@
+name = "boilerworks-hono-micro"
+main = "src/index.ts"
+compatibility_date = "2025-03-21"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ENVIRONMENT = "development"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "boilerworks-db"
+database_id = "local"
+migrations_dir = "migrations"
