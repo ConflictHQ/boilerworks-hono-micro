@@ -88,3 +88,7 @@ scripts/
 ## Want to help build this?
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and the [stack primer](../primers/hono-micro/PRIMER.md) for architecture and conventions.
+
+---
+
+Boilerworks is a [Conflict](https://weareconflict.com) brand. CONFLICT is a registered trademark of Conflict LLC.
