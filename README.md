@@ -46,6 +46,18 @@ pnpm db:migrate:local # Apply migrations locally
 pnpm seed             # Seed a dev API key
 ```
 
+## Environment Configuration
+
+Runtime vars are set in `wrangler.toml` under `[vars]`:
+
+| Variable    | Default     | Description         |
+| ----------- | ----------- | ------------------- |
+| ENVIRONMENT | development | Runtime environment |
+
+The D1 database binding is configured in `wrangler.toml` under `[[d1_databases]]`. For local dev, `wrangler dev` creates a local SQLite database automatically. For production, create a D1 database via `wrangler d1 create boilerworks-db` and update the `database_id`.
+
+See `.env.example` for a reference of all configurable values.
+
 ## Project Structure
 
 ```

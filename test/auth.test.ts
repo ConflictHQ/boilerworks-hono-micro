@@ -1,10 +1,12 @@
 import { env } from 'cloudflare:test';
 import { describe, it, expect, beforeEach } from 'vitest';
 import app from '../src/index';
+import { resetRateLimitStore } from '../src/middleware/rate-limit';
 import { applyMigrations, seedApiKey, cleanTables } from './helpers';
 
 describe('API Key Authentication', () => {
   beforeEach(async () => {
+    resetRateLimitStore();
     await applyMigrations(env.DB);
     await cleanTables(env.DB);
   });
@@ -52,6 +54,7 @@ describe('API Key Authentication', () => {
 
 describe('Scope checking', () => {
   beforeEach(async () => {
+    resetRateLimitStore();
     await applyMigrations(env.DB);
     await cleanTables(env.DB);
   });
@@ -97,5 +100,62 @@ describe('Scope checking', () => {
 
     const body = await resp.json();
     expect(body.message).toContain('Missing scope');
+  });
+});
+
+describe('Key revocation', () => {
+  beforeEach(async () => {
+    resetRateLimitStore();
+    await applyMigrations(env.DB);
+    await cleanTables(env.DB);
+  });
+
+  it('rejects a revoked API key via the DELETE endpoint', async () => {
+    // Create an admin key to manage other keys
+    const adminKey = 'admin-key-for-revoke';
+    await seedApiKey(env.DB, adminKey, ['*'], 'admin');
+
+    // Create a second key via the API
+    const createResp = await app.request(
+      '/api-keys',
+      {
+        method: 'POST',
+        headers: { 'X-API-Key': adminKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'ephemeral-key', scopes: ['events.read'] }),
+      },
+      env,
+    );
+    expect(createResp.status).toBe(201);
+    const createBody = await createResp.json();
+    const ephemeralKey = createBody.data.key;
+    const ephemeralId = createBody.data.id;
+
+    // Verify the new key works
+    const verifyResp = await app.request(
+      '/events',
+      { headers: { 'X-API-Key': ephemeralKey } },
+      env,
+    );
+    expect(verifyResp.status).toBe(200);
+
+    // Revoke the key
+    const revokeResp = await app.request(
+      `/api-keys/${ephemeralId}`,
+      { method: 'DELETE', headers: { 'X-API-Key': adminKey } },
+      env,
+    );
+    expect(revokeResp.status).toBe(200);
+
+    // Verify the revoked key is rejected
+    const rejectedResp = await app.request(
+      '/events',
+      { headers: { 'X-API-Key': ephemeralKey } },
+      env,
+    );
+    expect(rejectedResp.status).toBe(401);
+
+    const rejectedBody = await rejectedResp.json();
+    expect(rejectedBody.ok).toBe(false);
+    expect(rejectedBody.message).toBe('Invalid API key');
   });
 });

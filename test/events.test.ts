@@ -1,12 +1,14 @@
 import { env } from 'cloudflare:test';
 import { describe, it, expect, beforeEach } from 'vitest';
 import app from '../src/index';
+import { resetRateLimitStore } from '../src/middleware/rate-limit';
 import { applyMigrations, seedApiKey, seedEvent, cleanTables } from './helpers';
 
 const TEST_KEY = 'test-key-events';
 
 describe('Events CRUD', () => {
   beforeEach(async () => {
+    resetRateLimitStore();
     await applyMigrations(env.DB);
     await cleanTables(env.DB);
     await seedApiKey(env.DB, TEST_KEY, ['*']);
@@ -39,6 +41,23 @@ describe('Events CRUD', () => {
         .first();
       expect(row).not.toBeNull();
       expect(row!.type).toBe('order.created');
+    });
+
+    it('returns 400 for invalid JSON body', async () => {
+      const resp = await app.request(
+        '/events',
+        {
+          method: 'POST',
+          headers: { 'X-API-Key': TEST_KEY, 'Content-Type': 'application/json' },
+          body: '{not valid json!!!',
+        },
+        env,
+      );
+
+      expect(resp.status).toBe(400);
+      const body = await resp.json();
+      expect(body.ok).toBe(false);
+      expect(body.message).toBe('Invalid JSON body');
     });
 
     it('rejects invalid payload', async () => {
