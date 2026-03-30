@@ -12,13 +12,13 @@ events.use('/*', apiKeyAuth);
 const CreateEventSchema = z.object({
   type: z.string().min(1).max(255),
   source: z.string().min(1).max(255),
-  payload: z.record(z.unknown()).optional().default({}),
+  payload: z.record(z.string(), z.unknown()).optional().default({}),
 });
 
 const UpdateEventSchema = z.object({
   type: z.string().min(1).max(255).optional(),
   source: z.string().min(1).max(255).optional(),
-  payload: z.record(z.unknown()).optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
   status: z.string().min(1).max(50).optional(),
 });
 
