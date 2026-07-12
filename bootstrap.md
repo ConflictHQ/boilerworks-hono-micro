@@ -12,6 +12,7 @@ See the [stack primer](../primers/hono-micro/PRIMER.md) for stack-specific conve
 - **Soft deletes** via `deleted_at` column. Filter with `WHERE deleted_at IS NULL`.
 - **API key auth** on all endpoints except `/health`. SHA256-hashed keys in D1.
 - **Scope-based permissions** per API key. Wildcard `*` grants all access.
+- **Global rate limiting**: 60 req/min per IP on all routes (including `/health`) via in-memory middleware. Per-isolate only — swap for Durable Objects/KV for distributed limits.
 - **ApiResponse** wrapper on all responses: `{ok: boolean, data?, message?, errors?}`.
 - **Zod** for input validation at handler boundaries.
 - **D1 migrations** are plain SQL in `migrations/`. Apply with `wrangler d1 migrations apply`.

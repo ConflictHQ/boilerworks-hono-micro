@@ -33,6 +33,10 @@ pnpm dev                # Start wrangler dev server on :8787
 
 All endpoints except `/health` require an `X-API-Key` header. Keys are SHA256-hashed and stored in D1. Each key has scopes (`["*"]` for wildcard).
 
+## Rate Limiting
+
+A global rate limiter (`src/middleware/rate-limit.ts`) allows 60 requests per minute per IP across all routes, including `/health`. Responses carry `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers; exceeding the limit returns `429`. The store is an in-memory Map scoped to a single Workers isolate — fine for burst protection, not distributed enforcement. Swap in Durable Objects or KV if you need a shared counter.
+
 ## Commands
 
 ```bash
@@ -56,7 +60,7 @@ Runtime vars are set in `wrangler.toml` under `[vars]`:
 
 The D1 database binding is configured in `wrangler.toml` under `[[d1_databases]]`. For local dev, `wrangler dev` creates a local SQLite database automatically. For production, create a D1 database via `wrangler d1 create boilerworks-db` and update the `database_id`.
 
-See `.env.example` for a reference of all configurable values.
+Local dev secrets go in `.dev.vars` (gitignored) — see `.dev.vars.example` for a reference. No `.env` files are used.
 
 ## Project Structure
 
@@ -69,6 +73,7 @@ src/
   middleware/
     api-key-auth.ts     # API key validation middleware
     require-scope.ts    # Scope-checking middleware
+    rate-limit.ts       # Global 60 req/min/IP limiter (in-memory, per-isolate)
   routes/
     health.ts           # GET /health
     events.ts           # Events CRUD
@@ -81,6 +86,7 @@ test/
   health.test.ts
   auth.test.ts
   events.test.ts
+  rate-limit.test.ts
 scripts/
   seed-api-key.ts       # Local dev key seeder
 ```
